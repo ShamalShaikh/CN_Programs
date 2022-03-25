@@ -1,0 +1,6 @@
+60345	TCP	3	ls
+60346	TCP	3	cal
+60347	TCP	3	who
+60348	TCP	3	ps
+60349	TCP	3	ls
+60350	TCP	3	netstat

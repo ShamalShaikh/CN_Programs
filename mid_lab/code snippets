@@ -1,0 +1,882 @@
+Basics 
+
+1.	Makefile
+	
+CC = g++
+CFLAGS=-g -Wall
+#OBJS=shared_memory.o
+EXE= C1.exe C2.exe C3.exe S.exe
+
+all: $(EXE)
+
+%.exe: %.o $(OBJS)
+	$(CC) $(CFLAGS) $< $(OBJS) -o $@
+
+#%.o: %.c %.h
+#	$(CC) $(CFLAGS) -c $< -o $@
+	
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c $< -o $@	
+
+clean:
+	rm -rf *.dSYM *.o $(EXE)
+	
+
+
+
+HEADER FILES
+--------------------------------------------------------------------------------------------------------------------------------
+
+#include<time.h>
+#include<stdio.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<string.h>
+#include<sys/select.h>
+#include<pthread.h>
+#include<signal.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/types.h>
+#include<sys/ipc.h>
+#include<sys/shm.h>
+#include<unistd.h>
+#include<sys/un.h>
+#include<netinet/ip.h>
+#include<arpa/inet.h>
+#include<errno.h>
+#include<netinet/if_ether.h>
+#include<net/ethernet.h>
+#include<netinet/ether.h>
+#include<netinet/udp.h>
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(int argc, char* argv[]){
+	
+	return 0;
+}
+
+Code Snippets 
+
+
+semaphores
+
+	sem_unlink("/p1");
+	sem_unlink("/p2");
+	
+	sem_t *sem1,*sem2;
+
+	sem1 = sem_open("/p1",O_CREAT,0644,0);
+	sem2 = sem_open("/p2",O_CREAT,0644,0);
+
+	sem_post(sem1);  		
+	sem_wait(sem2);
+
+	sem_close(sem1);
+	sem_close(sem2);
+
+exec
+	execlp("./P3.exe","./P3.exe",NULL);	
+
+dup2 
+
+	int x = dup(0);
+	int f = dup2(fd,0);	
+
+pipe
+
+	if (pipe(fd)==-1) 
+    { 
+        perror("Pipe fd Failed" ); 
+        exit(1); 
+    } 
+
+wait
+
+    wait(NULL);
+    waitpid(pid1,NULL,0);
+	waitpid(pid2,NULL,0);
+
+FIFO 
+
+	mkfifo("Friends", 0666); 
+	fd = open("Friends",O_WRONLY); 
+	unlink("Friends");
+
+popen
+	fp = (popen("./c1.exe","r"));
+	pclose(fp);
+
+	fd[0] = fileno(popen("./C1.exe","r"));
+
+
+pthread
+	pthread_t reader,writer;	
+	pthread_create(&reader,NULL,reads,NULL);
+	pthread_create(&writer,NULL,writes,NULL);
+	pthread_join(reader,NULL);
+	pthread_join(writer,NULL);
+
+	void *reads(void * arg)
+	{
+		fd1 = open("C1_chat",O_RDONLY);
+		read(fd1,str2,80);
+		printf("%s",str2);
+		close(fd1); 
+		return NULL;
+	}
+
+	void *writes(void *arg)
+	{
+		read(0,str1,80);
+		strcat(str1,"1");
+		fd = open("Friends",O_WRONLY); 
+	    write(fd, str1, 80); 
+	    close(fd);
+		return NULL;
+	}
+	
+	void do_thread_service(void *arg)
+	{
+		int *args= (int*)arg ;
+ 	
+	}
+	
+	pthread_t t_service;
+ 	if(pthread_create(&t_service,NULL,(void*)&do_thread_service ,(void*)args)!=0)
+	perror("\npthread_create ");
+
+	void *fun1(void *arg)
+	{
+		signal(SIGINT,fn1);
+		pthread_kill(t1,SIGINT);
+		pthread_kill(t1,SIGINT);
+		return NULL;
+	}
+ 	
+
+iovec - readv and writev
+
+	struct iovec iov[3];
+	for(i = 0 ; i < 3; i++)
+	{
+		iov[i].iov_base = buf[i];
+        iov[i].iov_len = sizeof (buf[i]);
+    }
+    ssize_t nrr = readv (fd, iov, 3);
+	printf("\t\t\tRead: %ld\n", nrr);
+	printf("\t\t\tClient:\n");
+	for(i = 0 ; i < 3; i++)
+		printf("\t\t\t%s\n", (char *)iov[i].iov_base);
+
+	struct iovec iov[3];
+	for(i = 0; i < 3; i++)
+		scanf(" %[^\n]s", buf[i]);
+	for (i = 0; i < 3; i++) {
+        iov[i].iov_base = (void *)buf[i];
+        iov[i].iov_len = sizeof(buf[i]);
+    }
+	ssize_t  nrr= writev(fd, iov, 3);
+	printf("Wrote: %ld\n",nrr);
+
+FILE * pointer
+
+	FILE *fp = fopen("code.cpp","r"); 
+	fclose(fp);	
+
+poll
+
+	int pret;
+	struct pollfd pfds[3];
+	int timeout;
+	for(int i=0;i<3;++i){
+		pfds[i].fd = fd[i];
+		pfds[i].events = POLLIN;
+	}
+	int afds = 3;
+	while(afds>0){
+		
+		timeout = 5000;
+		pret = poll(pfds,3,timeout);
+		if(pret == 0){
+			printf("%d\n",timeout);
+		}
+		else{
+			for(int i=0;i<3;++i){
+				if(pfds[i].revents & POLLIN){
+					read(fd[i],str,BUFSIZ);
+					puts(str);
+					afds--;	
+				}
+			}
+		}
+	}
+
+
+get group id - 
+	getpgid(getpid())
+	setpgid(getpid(),X);
+
+Signals
+
+	kill(X,SIGUSR1);	
+
+	killpg(getpgid(getpid()),SIGUSR1);
+
+	signal(SIGUSR1,fn);
+	signal(SIGINT,SIG_DFL);
+
+	
+	static void hdl (int sig, siginfo_t *siginfo, void *context)
+	{
+		printf ("Sending PID: %ld, UID: %ld\n",
+				(long)siginfo->si_pid, (long)siginfo->si_uid);
+	}
+	struct sigaction act;
+	memset(&act, '\0', sizeof(act));
+	act.sa_sigaction = &hdl;
+	act.sa_flags = SA_SIGINFO;
+	if(sigaction(SIGUSR1,&act,NULL)<0){
+		perror("sigaction");
+		return 1;
+	}
+
+
+Message queues
+
+	struct mesg {
+	long mtype;
+	char mdata[100];
+	}msg,msg2;
+
+	int msqid;
+	key_t msg_key = ftok("hi.txt",65);
+	msqid = msgget(msg_key,0666|IPC_CREAT);
+
+	msgrcv(msqid,&msg,sizeof(msg),0,0);
+
+	msgsnd(msqid,&msg2,sizeof(msg2),0);
+
+	msgctl(msqid,IPC_RMID,0);
+
+	struct msqid_ds qbuf;
+	msgctl(msqid, IPC_STAT, &qbuf );
+	cout<<"\nMessage Queue ID : "<<msqid;
+	cout<<"\nMessage Queue NUM : "<<qbuf.msg_qnum;
+	cout<<"\nMessage Queue LEN : "<<qbuf.msg_qbytes;
+	cout<<"\nMessage Queue LAST PID : "<<qbuf.msg_lspid;
+	cout<<"\nMessage Queue LAST RCV : "<<qbuf.msg_lrpid;
+
+
+void mclear(){
+	msgctl(msqid,IPC_STAT,&buf);
+	while(buf.msg_qnum>0){
+		msgrcv(msqid,&msg,sizeof(msg),0,0);
+		cout<<msg.mtype<<"\n";
+		cout<<msg.mdata<<"\n";
+	}
+}
+
+
+pid and parent pid
+
+	getpid()
+	getppid()
+
+
+Get pid of another process
+
+int fd = fileno(popen("pidof ./S", "r"));
+	char s[1000];
+	read(fd, &s, 1000);
+	X = atoi(s);	
+
+
+SOCKETS
+
+
+
+				SHARE MEMORY
+-----------------------------------------------------------------------------------------------------------------------------------
+
+	int state=1;
+	key_t h=ftok(".",state++);	// value of state should on every program where this share memory is used
+ 	int shmid=shmget(h,sizeof(int),IPC_CREAT|0666);
+ 	share_memory=shmat(shmid,(const void*)0,0);
+ 	shmdt(block);
+ 	shmctl(shared_block_id,IPC_RMID,NULL);
+ 	
+ 	
+ 				SEMAPHORE
+-----------------------------------------------------------------------------------------------------------------------------------
+ 	
+	void sem_wait(int semid)
+	{
+		struct sembuf sb;
+		sb.sem_num=0;
+		sb.sem_op=-1;
+		sb.sem_flg=0;
+		if((semop(semid,&sb,1))==-1)
+		{
+			perror("\nFailed to acquire semaphore.");
+			exit(0);
+		}
+	}
+
+	void sem_try_wait(int semid)
+	{
+		struct sembuf sb;
+		sb.sem_num=0;
+		sb.sem_op=-1;
+		sb.sem_flg=IPC_NOWAIT;;
+		return semop(semid,&sb,1);
+	}
+
+	void sem_signal(int semid)
+	{
+		struct sembuf sb;
+		sb.sem_num=0;
+		sb.sem_op=1;
+		sb.sem_flg=0;
+		if((semop(semid,&sb,1))==-1)
+		{
+			perror("\nFailed to release semaphore.");
+			exit(0);
+		}
+	}
+
+	int state=1;
+	key_t h=ftok(".",state++);	// value of state should on every program where this semaphore is used
+	int sem_id;
+	if((sem_id=semget(h,1,0666|IPC_CREAT))==-1)
+ 	{
+		printf("error in creation semaphore\n");
+		exit(0);
+	}
+	
+	int semaphore_value=1;
+
+	if((semctl(sem_id,0,SETVAL,semaphore_value))==-1)
+	{
+		printf("error to set value\n");
+	}
+
+ 				SELECT
+----------------------------------------------------------------------------------------------------------------------------------
+	fd_set readset;
+	FD_ZERO(&readset);
+	
+	int max=-1;
+	
+	for(i=0;i<no_of_file_descriptors;i++)
+	{
+		FD_SET(fd[i], &readset);
+		if(fd[i]>max)
+		max=fd[i];		
+	}
+	
+	
+	struct timeval t;
+	t.tv_sec=3;
+	t.tv_usec=100;
+	int rv = select(max + 1, &readset, NULL, NULL, &t);
+
+	if (rv == -1) 
+	{
+		perror("select");
+	}
+	
+	else if (rv == 0) 
+	{
+    		printf("Timeout occurred!\n");
+	} 
+	
+	else 
+	{
+		int i;
+		// check for events 
+		for(i=0;i<no_of_file_descriptors;i++)
+    		if (FD_ISSET(fd[i], &readset)) 
+		{
+
+			FD_CLR(fd[i],&readset);
+    		}
+	} 
+
+	close(fd[i]);
+
+
+		           CONNECTION ORIENTED SERVER	( usage -:  "./a.out port_no")
+---------------------------------------------------------------------------------------------------------------------------------
+	if(argc!=2)
+	printf("\n usage ./a.out port_no");
+
+	int sfd;
+	struct sockaddr_in serv_addr,cli_addr;
+	socklen_t cli_len;
+	int port_no=atoi(argv[1]);
+
+	if((sfd = socket(AF_INET,SOCK_STREAM,0))==-1)
+	perror("\n socket ");
+	else printf("\n socket created successfully");
+
+	bzero(&serv_addr,sizeof(serv_addr));
+
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_port = htons(port_no);
+	serv_addr.sin_addr.s_addr = INADDR_ANY;
+
+	if(bind(sfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr))==-1)
+		perror("\n bind : ");
+	else 
+		printf("\n bind successful ");
+
+	listen(sfd,10);
+
+	int nsfd;
+	if((nsfd = accept(sfd , (struct sockaddr *)&cli_addr , &cli_len))==-1)
+		perror("\n accept ");
+	else 
+		printf("\n accept successful");
+
+
+		          CONNECTION ORIENTED CLIENT	( usage -:  "./a.out port_no")
+---------------------------------------------------------------------------------------------------------------------------------
+
+	if(argc!=2)
+	printf("\n usage ./a.out port_no");
+
+	int sfd;
+	struct sockaddr_in serv_addr;
+	int port_no=atoi(argv[1]);
+
+	bzero(&serv_addr,sizeof(serv_addr));
+
+	if((sfd = socket(AF_INET , SOCK_STREAM , 0))==-1)
+	perror("\n socket");
+	else printf("\n socket created successfully\n");
+
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_port = htons(port_no);
+	serv_addr.sin_addr.s_addr = INADDR_ANY;
+
+	if(connect(sfd , (struct sockaddr *)&serv_addr , sizeof(serv_addr))==-1)
+		perror("\n connect : ");
+	else 
+		printf("\nconnect succesful");
+
+ if( send(csfd , message , strlen(message) , 0) < 0)
+  {
+          printf("Send failed\n");
+  }		
+
+	  if(recv(csfd, buffer, 1024, 0) < 0)
+  {
+     printf("Receive failed\n");
+  }	
+
+
+
+			           CONNECTION LESS SERVER	( usage -:  "./a.out port_no")
+---------------------------------------------------------------------------------------------------------------------------------
+	if(argc!=2)
+	printf("\n usage ./a.out port_no");
+
+	int sfd;
+	struct sockaddr_in serv_addr,cli_addr;
+	socklen_t cli_len;
+	int port_no=atoi(argv[1]);
+
+	if((sfd = socket(AF_INET,SOCK_DGRAM,0))==-1)
+	perror("\n socket ");
+	else printf("\n socket created successfully");
+
+	bzero(&serv_addr,sizeof(serv_addr));
+
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_port = htons(port_no);
+	serv_addr.sin_addr.s_addr = INADDR_ANY;
+
+	if(bind(sfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr))==-1)
+	perror("\n bind : ");
+	else printf("\n bind successful ");
+
+	cli_len = sizeof(cli_addr);
+
+	fgets( buffer , 256 , stdin );
+	sendto(sfd , buffer , 256 , 0 , ( struct sockaddr * ) &cli_addr ,  cli_len);
+	recvfrom(sfd , buffer , 256 , 0 , ( struct sockaddr * ) &cli_addr , & cli_len );
+
+		          CONNECTION LESS CLIENT	( usage -:  "./a.out port_no")
+---------------------------------------------------------------------------------------------------------------------------------
+
+	if(argc!=2)
+	printf("\n usage ./a.out port_no");
+
+	int sfd;
+	struct sockaddr_in serv_addr;
+	int port_no=atoi(argv[1]);
+	char buffer[256];
+
+	bzero(&serv_addr,sizeof(serv_addr));
+
+	if((sfd = socket(AF_INET , SOCK_DGRAM , 0))==-1)
+	perror("\n socket");
+	else printf("\n socket created successfully\n");
+
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_port = htons(port_no);
+	serv_addr.sin_addr.s_addr = INADDR_ANY;
+	
+	socklen_t serv_len = sizeof(serv_addr);
+	
+	fgets( buffer , 256 , stdin );
+	sendto(sfd , buffer , 256 , 0 , ( struct sockaddr * ) &serv_addr ,  serv_len);
+	recvfrom(sfd , buffer , 256 , 0 , ( struct sockaddr * ) &serv_addr , & serv_len );
+
+		           UNIX SOCKET CONNECTION ORIENTED SERVER	( usage -:  "./a.out")
+---------------------------------------------------------------------------------------------------------------------------------
+	#define ADDRESS  "mysocket"
+
+	int  usfd;
+	struct sockaddr_un userv_addr,ucli_addr;
+  	int userv_len,ucli_len;
+
+	usfd = socket(AF_UNIX , SOCK_STREAM , 0);
+	perror("socket");
+
+  	bzero(&userv_addr,sizeof(userv_addr));
+
+  	userv_addr.sun_family = AF_UNIX;
+	strcpy(userv_addr.sun_path, ADDRESS);
+	unlink(ADDRESS);
+	userv_len = sizeof(userv_addr);
+
+	if(bind(usfd, (struct sockaddr *)&userv_addr, userv_len)==-1)
+	perror("server: bind");
+
+	listen(usfd, 5);
+
+	ucli_len=sizeof(ucli_addr);
+
+	int nusfd;
+	nusfd=accept(usfd, (struct sockaddr *)&ucli_addr, &ucli_len);
+
+
+		          UNIX SOCKET CONNECTION ORIENTED CLIENT	( usage -:  "./a.out")
+---------------------------------------------------------------------------------------------------------------------------------
+
+	#define ADDRESS     "mysocket"
+
+	int usfd;
+	struct sockaddr_un userv_addr;
+  	int userv_len,ucli_len;
+
+  	usfd = socket(AF_UNIX, SOCK_STREAM, 0);
+
+  	if(usfd==-1)
+  	perror("\nsocket  ");
+
+  	bzero(&userv_addr,sizeof(userv_addr));
+  	userv_addr.sun_family = AF_UNIX;
+   	strcpy(userv_addr.sun_path, ADDRESS);
+
+	userv_len = sizeof(userv_addr);
+
+	if(connect(usfd,(struct sockaddr *)&userv_addr,userv_len)==-1)
+	perror("\n connect ");
+
+	else printf("\nconnect succesful");
+
+
+
+				SEND_FD AND RECV_FD
+---------------------------------------------------------------------------------------------------------------------
+
+int send_fd(int socket, int fd_to_send)
+ {
+  struct msghdr socket_message;
+  struct iovec io_vector[1];
+
+  struct cmsghdr *control_message = NULL;
+  char message_buffer[1];
+  /* storage space needed for an ancillary element with a paylod of length is CMSG_SPACE(sizeof(length)) */
+  char ancillary_element_buffer[CMSG_SPACE(sizeof(int))];
+  int available_ancillary_element_buffer_space;
+
+  /* at least one vector of one byte must be sent */
+  message_buffer[0] = 'F';
+  io_vector[0].iov_base = message_buffer;
+  io_vector[0].iov_len = 1;
+
+  /* initialize socket message */
+  memset(&socket_message, 0, sizeof(struct msghdr));
+  socket_message.msg_iov = io_vector;
+  socket_message.msg_iovlen = 1;
+
+  /* provide space for the ancillary data */
+  available_ancillary_element_buffer_space = CMSG_SPACE(sizeof(int));
+  memset(ancillary_element_buffer, 0, available_ancillary_element_buffer_space);
+  socket_message.msg_control = ancillary_element_buffer;
+  socket_message.msg_controllen = available_ancillary_element_buffer_space;
+
+  /* initialize a single ancillary data element for fd passing */
+  control_message = CMSG_FIRSTHDR(&socket_message);
+  control_message->cmsg_level = SOL_SOCKET;
+  control_message->cmsg_type = SCM_RIGHTS;
+  control_message->cmsg_len = CMSG_LEN(sizeof(int));
+  *((int *) CMSG_DATA(control_message)) = fd_to_send;
+
+  return sendmsg(socket, &socket_message, 0);
+ }
+ 
+ 
+ 
+ 
+ 
+ int recv_fd(int socket)
+ {
+  int sent_fd, available_ancillary_element_buffer_space;
+  struct msghdr socket_message;
+  struct iovec io_vector[1];
+  struct cmsghdr *control_message = NULL;
+  char message_buffer[1];
+  char ancillary_element_buffer[CMSG_SPACE(sizeof(int))];
+
+  /* start clean */
+  memset(&socket_message, 0, sizeof(struct msghdr));
+  memset(ancillary_element_buffer, 0, CMSG_SPACE(sizeof(int)));
+
+  /* setup a place to fill in message contents */
+  io_vector[0].iov_base = message_buffer;
+  io_vector[0].iov_len = 1;
+  socket_message.msg_iov = io_vector;
+  socket_message.msg_iovlen = 1;
+
+  /* provide space for the ancillary data */
+  socket_message.msg_control = ancillary_element_buffer;
+  socket_message.msg_controllen = CMSG_SPACE(sizeof(int));
+
+  if(recvmsg(socket, &socket_message, MSG_CMSG_CLOEXEC) < 0)
+   return -1;
+
+  if(message_buffer[0] != 'F')
+  {
+   /* this did not originate from the above function */
+   return -1;
+  }
+
+  if((socket_message.msg_flags & MSG_CTRUNC) == MSG_CTRUNC)
+  {
+   /* we did not provide enough space for the ancillary element array */
+   return -1;
+  }
+
+  /* iterate ancillary elements */
+   for(control_message = CMSG_FIRSTHDR(&socket_message);
+       control_message != NULL;
+       control_message = CMSG_NXTHDR(&socket_message, control_message))
+  {
+   if( (control_message->cmsg_level == SOL_SOCKET) &&
+       (control_message->cmsg_type == SCM_RIGHTS) )
+   {
+    sent_fd = *((int *) CMSG_DATA(control_message));
+    return sent_fd;
+   }
+  }
+
+  return -1;
+ }
+
+
+
+
+		           UNIX SOCKET CONNECTION LESS SERVER	( usage -:  "./a.out")
+---------------------------------------------------------------------------------------------------------------------------------
+	#define ADDRESS  "mysocket"
+
+	int  usfd;
+	struct sockaddr_un userv_addr,ucli_addr;
+  	int userv_len,ucli_len;
+
+	usfd = socket(AF_UNIX , SOCK_DGRAM , 0);
+	perror("socket");
+
+  	bzero(&userv_addr,sizeof(userv_addr));
+
+  	userv_addr.sun_family = AF_UNIX;
+	strcpy(userv_addr.sun_path, ADDRESS);
+	unlink(ADDRESS);
+	userv_len = sizeof(userv_addr);
+
+	if(bind(usfd, (struct sockaddr *)&userv_addr, userv_len)==-1)
+	perror("server: bind");
+
+	fgets( buffer , 256 , stdin );
+	sendto(sfd , buffer , 256 , 0 , ( struct sockaddr * ) &ucli_addr ,  ucli_len);
+	recvfrom(sfd , buffer , 256 , 0 , ( struct sockaddr * ) &ucli_addr , & uscli_len );
+
+
+		          UNIX SOCKET CONNECTION LESS CLIENT	( usage -:  "./a.out")
+---------------------------------------------------------------------------------------------------------------------------------
+
+	#define ADDRESS     "mysocket"
+
+	int usfd;
+	struct sockaddr_un userv_addr;
+  	int userv_len,ucli_len;
+
+  	usfd = socket(AF_UNIX, SOCK_DGRAM, 0);
+
+  	if(usfd==-1)
+  	perror("\nsocket  ");
+
+  	bzero(&userv_addr,sizeof(userv_addr));
+  	userv_addr.sun_family = AF_UNIX;
+   	strcpy(userv_addr.sun_path, ADDRESS);
+
+	userv_len = sizeof(userv_addr);
+	
+	fgets( buffer , 256 , stdin );
+	sendto(sfd , buffer , 256 , 0 , ( struct sockaddr * ) &userv_addr ,  userv_len);
+	recvfrom(sfd , buffer , 256 , 0 , ( struct sockaddr * ) &userv_addr , & userv_len );
+
+
+		         SOCKET PAIR	( usage -:  "./a.out")
+---------------------------------------------------------------------------------------------------------------------------------
+
+	int usfd[2];
+	if(socketpair(AF_UNIX,SOCK_STREAM,0,usfd)==-1)
+	perror("socketpair ");
+			
+	int c=fork();
+			
+	if(c==-1)
+	perror("\nfork ");
+			
+	else if(c>0)
+	{
+		close(usfd[1]);
+	}
+			
+	else if(c==0)
+	{
+		close(usfd[0]);	
+		dup2(usfd[1],0);
+		execvp(file_name,args);
+	}
+
+-----------------------------------------------------------------------------------------------------------------------------------
+  struct winsize sz;
+  ioctl(0, TIOCGWINSZ, &sz);
+  printf("Screen width: %i  Screen height: %i\n", sz.ws_col, sz.ws_row);
+
+  sprintf(s2,"%d",Y);
+
+  fflush(stdout);
+
+  char * cmd[] = {"/usr/bin/xterm", "-e", "yourchatprogram", NULL};
+	execv(cmd[0], cmd);
+
+    if ((sock = getsockname(csfd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) 
+    { 
+        perror("getsockname"); 
+        exit(EXIT_FAILURE); 
+    }	
+
+    if ((peer = getpeername(csfd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) 
+    { 
+        perror("getpeername"); 
+        exit(EXIT_FAILURE); 
+    }
+
+        if (setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) 
+    { 
+        perror("setsockopt"); 
+        exit(EXIT_FAILURE); 
+    } 
+
+    pthread_mutex_t locks = PTHREAD_MUTEX_INITIALIZER;
+
+	void * socketThread(void *arg)
+	{
+	  int nsfd = *((int *)arg);
+	  pthread_mutex_lock(&locks);
+	  recv(nsfd , client_message , 2000 , 0);
+
+	  // Send message to the client socket 
+	  cout<<"Enter SocketThread!\n";
+	  cout<<client_message<<"\n";
+	  char *message = (char*)malloc(sizeof(client_message)+20);
+	  strcpy(message,"HELLO WORLD ! ");
+	  strcat(message,client_message);
+	  strcat(message,"\n");
+	  strcpy(buffer,message);
+	  free(message);
+
+	  sleep(1);
+
+	  send(nsfd,buffer,13,0);
+
+	  printf("Exit socketThread \n");
+	  pthread_mutex_unlock(&locks);
+	  close(nsfd);
+	  return NULL;
+	}
+
+
+ int sockets[2], child;
+    char buf[1024];
+
+
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0) {
+        perror("opening stream socket pair");
+        exit(1);
+    }
+
+
+    if ((child = fork()) == -1)
+        perror("fork");
+    else if (child) {   /* This is the parent. */
+        close(sockets[0]);
+        if (read(sockets[1], buf, 1024, 0) < 0)
+            perror("reading stream message");
+        printf("-->%s\n", buf);
+        if (write(sockets[1], DATA2, sizeof(DATA2)) < 0)
+            perror("writing stream message");
+        close(sockets[1]);
+    } else {        /* This is the child. */
+        close(sockets[1]);
+        if (write(sockets[0], DATA1, sizeof(DATA1)) < 0)
+            perror("writing stream message");
+        if (read(sockets[0], buf, 1024, 0) < 0)
+            perror("reading stream message");
+        printf("-->%s\n", buf);
+        close(sockets[0]);
+    }
+
+
+    int
+readline(int fd, char *buf, int maxlen)
+{
+    int n, rc;
+    char c;
+
+    for (n = 1; n < maxlen; n++) {
+	if ((rc = read(fd, &c, 1)) == 1) {
+	    *buf++ = c;
+	    if (c == '\n')
+		break;
+	} else if (rc == 0) {
+	    if (n == 1)
+		return 0; // EOF, no data read
+	    else
+		break; // EOF, read some data
+	} else
+	    return -1; // error
+    }
+
+    *buf = '\0'; // null-terminate
+    return n;
+}
